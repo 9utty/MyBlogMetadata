@@ -108,7 +108,7 @@ export const HomeSlice = createSlice({
 
 - Slice들을 만들고 사용하면서 실제로 Component안에서 사용하는 State들을 initialState로 만들어두고 Component에서는 행위가 일어날때마다 dispatch로 store에 Update를 해주면서 데이터들을 저장하고 최종 Submit에서 Slice에서 가지고 있는 State를 APIServer에 보내는 로직으로 처리했다.
 
-```
+```typescript
 return (
   <View
     style=
