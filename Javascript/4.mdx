@@ -1,0 +1,119 @@
+---
+title: "Promise 기본 개념부터~"
+date: "2023-05-07"
+tags: ["javascript"]
+---
+
+## Javascript의 Promise
+
+- 비동기 연산을 다루는 Promise
+
+- Promise는 CallBack 지옥에서 탈출하게 도와줄 수 있다
+
+```javascript
+function delay(sec, callback) {
+  setTimeout(() => {
+    callback(new Date().toISOString());
+  }, sec * 1000);
+}
+
+consloe.log("start", new Date().toISOString());
+
+delay(1, (result) => {
+  console.log("delay", result);
+});
+
+console.log("hello");
+```
+
+- 위에 코드를 보면 실행 순서는 start -> hello -> delay가 실행된다
+
+- 순서를 보면 delay는 비동기라는걸 알 수 있다
+
+- 하지만 만약 1초 단위로 출력하게 만든다면?
+
+```javascript
+function delay(sec, callback) {
+  setTimeout(() => {
+    callback(new Date().toISOString());
+  }, sec * 1000);
+}
+
+delay(1, (result) => {
+  console.log(1, result);
+});
+delay(1, (result) => {
+  console.log(2, result);
+});
+delay(1, (result) => {
+  console.log(3, result);
+});
+```
+
+- 이런 코드로 실행한다고 하면 어떻게 실행이 될까?
+
+- 비동기일때 시작된 1, 2, 3의 시간은 비슷하고 1초후에 실행하는건 똑같지만 표현하는 시간은 우리가 흔하게 생각하는 절차지향처럼 드라마틱하게 1이 실행되고 1초 후에 2가 실행되거나 그렇지 않다
+
+## 만약 1 실행하고 2실행하게 하려면?
+
+```javascript
+function delay(sec, callback) {
+  setTimeout(() => {
+    callback(new Date().toISOString());
+  }, sec * 1000);
+}
+
+delay(1, (result) => {
+  console.log(1, result);
+  delay(1, (result) => {
+    delay(1, (result) => {
+      console.log(3, result);
+    });
+    console.log(2, result);
+  });
+});
+```
+
+- 마지막 3번 콜백 함수 밑에 console.log(2, result);를 한다고 했을땐 결과는 어떻게 나올까?
+
+- 사실은 맨 위에 코드랑 똑같이 동작을 한다.
+
+  - 하지만 여기서 문제가 되는건 사람은 보통 코드를 읽을때는 위에서 아래로 읽게되는데, 이때 흐름상 3이 먼저 실행 되어야 할 것 같은 느낌인데 전혀 다른 결과가 나오게 된다
+
+- 이 문데를 해결하기 위해 나온게 Promise, async, await 이용했습니다
+
+## 위에 코드를 Promise 형태로 구현해보자
+
+```javascript
+function delay(sec, callback) {
+  setTimeout(() => {
+    callback(new Date().toISOString());
+  }, sec * 1000);
+}
+
+delay(1, (result) => {
+  console.log(1, result);
+});
+
+function delayP(sec) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(new Date().toISOString());
+    }, sec * 1000);
+  });
+}
+
+delayP(1).then((result) => {
+  console.log(1, result);
+});
+```
+
+- resolve
+
+  - 할일을 다 했을때 호출하는 곳
+
+- reject
+
+  - 할일을 하다가 예외가 발생했을 때 호출 하는 곳
+
+- Promise는 CallBack과 다른건 resolve를 호출하게 되는데, 이때 resolve가 호출 된다면 then((result) => {}) 함수에서 받는 result에 값을 넣어주게 된다
