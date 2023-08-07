@@ -1,0 +1,79 @@
+---
+title: "PortNumber의 이해"
+date: "2023-05-12"
+tags: ["NextJS", "ReactJS", "React95"]
+---
+
+# 42메뉴추천을 소개합니다!
+
+[42메뉴추천 링크!!](https://42menurecommendation.netlify.app/)
+
+- 지금의 저의 블로그의 베이스가 된 프로젝트입니다!
+- 기간은 만 하루도 안걸린 것 같아요
+
+# 시작하게 된 배경
+
+- 42동료들과 저녁메뉴를 고르고 있던 중에 동료분 중 한분이 "저녁메뉴 추천해주는 프로그램 없나?로 시작했습니다
+
+- 그렇다면 디자인은 어떻게?
+
+  - 옛날 Window 스타일을 추천받아 구글링을 하기 시작했는데...
+
+# 나는 믿고 있었다고 JS!!!!
+
+- 역시나 거대한 커뮤니티를 가지고 있는 JS생태계
+- window95 스타일의 라이브러리가 웁녛ㅇ이 있을 것 같아!
+
+  - 다행히... 찾던 중에 react95라는 UI라이브러리를 찾게 되었습니다!! 짜잔
+  - https://storybook.react95.io/?path=/story/docs-welcome-to-react95--page
+
+  - react95를 만들어주신 개발자님 찬양합니다!😍
+
+# 정적페이지로 만들자!
+
+1. NextJS를 이용한 정정페이지를 만들기 시작했습니다
+
+- NextJS로 정적페이지를 추출할 수 있어요! "next build && next export" cmd 명령어로 빌드하면 된다고 합니다!
+
+2. 배포는 GithubPage? Netlify?
+
+- 제가 선택한건 Netlify라는 정적 웹 호스팅을 해주는 배포서비스를 이용했습니다!
+  - 그 이유로는 생각보다 초보가 사용하기 쉽게 잘 되어 있고, 배포도 간단하게 Netlify에서 github Repo와 연겷만 잘 해놓으면 자동으로 되기 때문에 선택했습니다
+
+3. 데이터들은 어떻게?
+
+```typescript
+interface Menu {
+  key: string;
+  value: string;
+}
+```
+
+- 프로젝트 내에서 그냥 Menu[]를 만들어두고 그 안에 데이터들을 정적으로 생성하고 사용했습니다!
+- key는 음식의 카테고리(예: 중식, 한식, 양식), value는 음식 이름(예: 탕수육, 짜장면, 김치찌개)
+
+# 페이지 소개합니다
+
+### 1. 로딩 액션 페이지
+
+![alt](https://user-images.githubusercontent.com/86397600/237934436-a7b84fda-7e27-458c-af65-8ae01921fd3f.png)
+
+- 만든이유는 별다른 이유 없어요... 그냥 이뻐보여서????.....
+
+### 2. 메인 페이지!
+
+![alt](https://user-images.githubusercontent.com/86397600/237934384-da03b52a-59e0-4810-a23b-b78b11ace477.png)
+
+- 메뉴추천 아이콘을 누르면 메뉴추천을 해주는 페이지가 모달로 나오게 됩니다!
+
+### 3. 메뉴추천
+
+![alt](https://user-images.githubusercontent.com/86397600/237934473-005dc1de-fc58-4099-ae3e-11fd28c453c4.png)
+
+- 점메추(점심 메뉴 추천), 저메추(저녁 메뉴 추천)을 고를 수 있습니다!
+
+- "추천시작"버튼을 누르면 rand함수를 이용해 렌덤의 인덱스 숫자를 뽑게 되고, Menu[] 로 만들어둔 정적데이터에서 인덱스번호로 찾게 됩니다!
+
+![alt](https://user-images.githubusercontent.com/86397600/237934512-321cc7d5-ce57-4b31-b8d0-88089a17f6a4.png)
+
+- 숫자전광판에 나오는 숫자는 Index 번호이고, 오늘의 저녁메뉴는? 한식 / 부침개 (key / value)를 나타낸다!
