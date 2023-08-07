@@ -1,0 +1,46 @@
+---
+title: "일급함수, add_maker"
+date: "2023-05-07"
+tags: ["Network", "Port"]
+---
+
+## 일급함수
+
+- Javascript에서 함수는 일급함수라고 할 수 있다. 함수를 값으로 다룰 수 있고 함수를 변수에 담을 수 있고, 변수에 담은 함수가 변수로 다뤄질 수 있다
+
+---
+
+쉽게 생각해서 함수를 변수처럼 쓸 수 있다? 가 맞는 것 같다
+
+---
+
+## 일급함수 예시
+
+```javascript
+var f1 = function(a) {  return a * a; };
+console.log(f1);
+
+function f3(f) {
+  return f();
+} // 함수를 받는 일급함수
+
+console.log(f3(function() {return: 10;}));
+```
+
+- 순수함수가 아닌 함수들은 평가 시점에 따라 값이 바뀔 수 있다. 하지만 순수함수는 언제 어디서든 똑같은 인자로 준다면 같은 값을 주기 때문에 평가의 시점이 중요하지 않다
+
+- 일급함수를 이용해 순수함수들을 사용하고, 순수함수들을 나누어서 만들어가는게 함수형 프로그래밍이라고 할 수 있을 것 같다
+
+## add_maker
+
+```javascript
+function add_maker(a) {
+  return function (b) {
+    return a + b; // 클로저 역할을 하고 있다
+  };
+}
+
+var add10 = add_maker(10);
+
+console.log(add10(20));
+```
