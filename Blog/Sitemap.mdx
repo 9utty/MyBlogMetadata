@@ -1,0 +1,107 @@
+---
+title: "sitemap에 대해서"
+date: "2023-08-17"
+tags: ["Blog", "Project"]
+---
+
+## 웹 서비스를 이용하는 주체?
+
+- 우리가 만드는 웹 서비스를 이용하는 주체는 유저가 있다. 하지만 유저만 존재할까?
+
+- No! 유저만 존재하지 않고, 우리가 흔히 알고 있는 크롤러들도 존재한다.
+
+- 이 크롤러에 대표적인건 google Search가 있다!
+
+## sitemap 이 뭘까?
+
+- sitemap은 이런 크롤러에게 우리 사이트안에서 네비게이션 역할을 하는거라고 생각하면 된다.
+
+## next-sitemap
+
+- next-sitemap은 간단한 script와 설정으로 npm run build시에 같이 작업이 진행되게 할 수 있다.
+
+## 작성이된 sitemap
+
+- 만들어진 sitemap은 일단 문제가 ssg만 사용을 할때는 좋은 것 같다.. 하지만 지금 내 블로근 SSR, SSG 둘다 사용하고 있는 입장인데 SSR로 생성이 되는 페이지의 경우에는 Sitemap이 생성이 안되는 것 같다
+
+## 다른 방법이 뭐있을까?
+
+- 동적생성이라는 방법을 찾게 되었다.
+
+- 동적생성은 직접 sitemap 코드를 작성해서 return 해주는 방식을 말한다
+
+- 하지만 이건 component에서 하는 방식과, API라우팅을 만들어서 사용하는 방식이 있다.
+
+## NextJS API route
+
+- 나는 NextJS의 좋은 기능 중 하나인 API Server를 구성해 url/api/sitemap.xml 로 접속을 시도하면 동적으로 생성된 sitemap이 생성되서 리턴하게 했다.
+
+```typescript
+import { getCategories, getPostsMeta } from "@/utils/posts";
+import { NextApiRequest, NextApiResponse } from "next";
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  res.statusCode = 200;
+  res.setHeader("Content-Type", "text/xml");
+
+  const URL = "https://9utty.world";
+  const categories = await getCategories();
+  const posts = await getPostsMeta();
+
+  if (categories === undefined || posts === undefined) {
+    res.end();
+    return;
+  }
+
+  let urls = `
+    <url>
+      <loc>${URL}</loc>
+      <changefreq>daily</changefreq>
+      <priority>1.0</priority>
+    </url>
+    <url>
+      <loc>${URL}/profile</loc>
+      <changefreq>daily</changefreq>
+      <priority>0.8</priority>
+    </url>
+  `;
+
+  for (const categoryId of categories) {
+    const categoryPosts = posts.filter((post) =>
+      post.id.startsWith(categoryId)
+    );
+
+    for (const post of categoryPosts) {
+      const postId = post.id.replace(`${categoryId}/`, "");
+      urls += `
+        <url>
+          <loc>${URL}/categories/${categoryId}/${postId}</loc>
+          <changefreq>daily</changefreq>
+          <priority>0.8</priority>
+        </url>
+      `;
+    }
+  }
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+    <urlset
+      xmlns="https://www.sitemaps.org/schemas/sitemap/0.9"
+      xmlns:news="https://www.google.com/schemas/sitemap-news/0.9"
+      xmlns:xhtml="https://www.w3.org/1999/xhtml"
+      xmlns:mobile="https://www.google.com/schemas/sitemap-mobile/1.0"
+      xmlns:image="https://www.google.com/schemas/sitemap-image/1.1"
+      xmlns:video="https://www.google.com/schemas/sitemap-video/1.1"
+    >
+      ${urls}
+    </urlset>
+  `;
+
+  res.end(xml);
+}
+```
+
+- 위에코드는 동적으로 sitemap을 생성하는 코드이다.
+- 폴더구조는 pages/api/sitemap.xml.ts로 만들어서 구현했다.
