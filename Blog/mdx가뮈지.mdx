@@ -1,0 +1,115 @@
+---
+title: "mdx???"
+date: "2023-08-17"
+tags: ["Blog", "Project"]
+---
+
+## mdx??
+
+- Markdown XML 의 합성이라고 한다.
+
+## 적용하게 된 계기?
+
+- 블로그를 작성중에 노션과 비슷하게 만들기 위해서 많은 고민을 했다.
+
+- 그래서 에디터도 넣어보고, 로그인 기능도 넣어보고, 직접 APIServer를 구성하고 RDS를 연결해 동작할 수 있게 만들어봤다. 하지만 에디터로 작성이 된 data 그러니까 어떠한 Object에 대한 Type을 어떻게 해줘야할지 고민을 하게 되었다.
+
+- 이 고민을 시작으로 여러 방법들을 찾아 보던 중에 mdx라는 방식을 찾게 되었고, 이 mdx는 결국 쉽게 생각하면 .md를 사용하는 것과 비슷하지만 Github에 레포지토리를 생성하고 거기에 작성해서 올리면 블로그에서 API로 가져와서 보여주는 형식으로 구성할 수 있는 방법을 찾게 되었다.
+  - 여기서 직접 프로젝트안에서 작성하는 방법도 있는데 따로 분리한 이유가 있다
+    - 프로젝트의 파일 크기가 커지는기 좀 별로인 것 같아 분리를 하는 쪽으로 방향을 잡게 되었다.
+
+## 데이터를 가져오는 법
+
+```typescript
+export async function getPostByName(
+  fileName: string
+): Promise<{ meta: Meta; compiledSource: MDXRemoteSerializeResult } | null> {
+  const res = await fetch(
+    `https://raw.githubusercontent.com/${process.env.NEXT_PUBLIC_GITHUB_REPO}/main/${fileName}`,
+    {
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_GITHUB_TOKEN}`,
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+    }
+  );
+
+  if (!res.ok) return null;
+
+  const rawMDX = await res.text();
+
+  if (rawMDX === "404: Not Found") return null;
+
+  const { frontmatter, content } = await compileMDX<{
+    title: string;
+    date: string;
+    tags: string[];
+  }>({
+    source: rawMDX,
+    components: {},
+    options: {
+      parseFrontmatter: true,
+      mdxOptions: {
+        rehypePlugins: [
+          rehypeHighlight,
+          rehypeSlug,
+          [
+            rehypeAutolinkHeadings,
+            {
+              behavior: "wrap",
+            },
+          ],
+        ],
+      },
+    },
+  });
+
+  const id = fileName.replace(/\.mdx$/, "");
+
+  const result = await serialize(rawMDX, {
+    parseFrontmatter: true,
+    mdxOptions: {
+      rehypePlugins: [
+        rehypeHighlight,
+        rehypeSlug,
+        [
+          rehypeAutolinkHeadings,
+          {
+            behavior: "wrap",
+          },
+        ],
+      ],
+    },
+  });
+
+  const blogPostObj = {
+    meta: {
+      id,
+      title: frontmatter.title,
+      date: frontmatter.date,
+      tags: frontmatter.tags,
+    },
+    compiledSource: result,
+  };
+
+  return blogPostObj;
+}
+```
+
+- 위에 코드를 보면 깃 레포 파일의 주소를 알고 있으면 그 주소에서 파일을 읽어오고, 그 읽어온 .mdx 파일에서 frontmatter를 일고 그 정보로 title, date, tag를 가져온다.
+
+- 쉽게 생각하면 컴파일을 해서 어떠한 오브젝트로 만드는 과정을 실행하는건데.. 여기서 문제가 하나 생겼다. 컴파일 후에 나오는 content가 React.Element인데 이게 Object의 symbol에러가 나오기 시작했다...
+
+## 위에 문제가 왜 나올까?
+
+- 일단 자세한 이유는 내가 아무리 찾아봐도 잘 모르겠다... 다른 자료를 검색해봐도 그냥 compileMDX 를 이용해서 나오는 content를 그대로 컴포넌트에 적용해서 하는데 나는 왜 안될까 해서 방법을 우회할 방법을 찾기 시작했다.
+
+## mdx를 컴파일 하는 방법도
+
+- mdx를 컴파일 하는 방법이 크게 두가지가 있는 것 같다.
+  -compileMDX, serialize 두가지 방식이 있다.
+
+- serialize방식으로는 frontmatter 정보를 받을 수 없기때문에 compileMDX를 이용해 먼저 데이터를 추출하고, 안에 내가 보여줘야할 mdx의 내용을 serialize를 이용해 content를 추출했다.
+
+- 물론 좋은 방법은 아닌 것 같지만, 그래도 내가 기능 구현이 우선이라고 생각했기 때문에 적용하게 되었다.... 성능적으로도 못쓸 정도의 이슈가 없기 때문에 아직은 괜찮다고 생각한다!...?
