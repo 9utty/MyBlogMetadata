@@ -1,0 +1,62 @@
+---
+title: "웹 소켓을 어떻게 써야할까?"
+date: "2023-06-15"
+tags: ["Project"]
+---
+
+## WebSocket
+
+- WebSocket을 어떻게 사용하는 걸까?
+- 나는 지금까지 C++로 socket을 사용했는데 방법이 조금은 다른 것 같다!
+
+```typescript
+import { io } from "socket.io-client";
+
+const createSocket = () => {
+  return io("http://localhost:8080", {
+    autoConnect: false,
+  });
+};
+```
+
+- 위의 코드에서보면 io를 불러오고 Socket 함수를 생성하는 코드를 볼 수 있다.
+
+- 원래 C++에서 소켓프로그래밍을 할때는 여러가지 작업들을 해야한다. socket을 생성하고 AF_INET 설정들도 해줘야하고, bind connect 등 여러 처리들을 해야하는 것에 비해 Websocket은 보다 편하게 인터페이스가 구성되어 있는 것 같다.
+
+## 웹소켓을 사용하는 방법은??
+
+- 생각보다 너무 간단한다... on, emit 이 두가지면 사실 다 할 수 있다고 볼 수 있는 것 같다!
+
+```typescript
+socket.on(event, () => {});
+
+socket.emit(event, data);
+```
+
+## on?
+
+- on은 다른 host에게서 데이터를 받는 행위를 하는거라고 볼 수 있다.
+
+```typescript
+socket.on(event, () => {});
+```
+
+- 위에 코드를 하나하나 뜯어보자
+  - event
+    - event는 "event"와 같은 스트링으로써 Socket 서버에서 "event"로 데이터를 보냈을때, 받을 수 있는 키워드라고 생각하면 쉽다.
+    - 설명 한번 더 해보자면 event는 data를 주고받는데 어떤 데이터 처리를 할건지에 대한 힌트라고 생각할 수 있을 것 같다.
+  - 콜백함수
+    - 소켓서버에서 보낸 데이터를 후처리를 하는 곳이라고 생각하면 된다.
+    - 후처리는 컴포넌트의 상태를 업데이트를 하거나 특정 연산을 한번 더 하거나 여러 작업들을 할 콜백 함수를 지정하는 걸 말한다
+
+## emit?
+
+- emit은 어떠한 event로 data를 전송하는 행위를 말한다
+
+```typescript
+socket.emit(event, data);
+```
+
+- event는 위에서 설명했던거와 똑같이 어떠한 이벤트로 보내는 힌트를 뜻한다
+
+- data는 그 이벤트를 처리하는데 필요한 데이터를 말한다. 그 데이터는 object일 수 있고, 또는 uid 와 같은 단일 데이터일 수 있다.
