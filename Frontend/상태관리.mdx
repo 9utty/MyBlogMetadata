@@ -1,0 +1,132 @@
+---
+title: "프론트엔드에서 상태관리는 Custom hook? Redux?"
+date: "2024-06-24"
+tags: ["Web", "FrontEnd"]
+---
+
+안녕하세요! 오랜만에 이렇게 글을 쓰게 되었네요. 그 동안 너무 바쁜 회사 생활 덕에 회사 프로젝트에 매달려 야근에 시달리다 이제야 조금 여유가 생겼습니다.
+이번에는 프론트엔드에서 상태 관리는 무엇으로? Custom hook? Redux? 에 대해 이야기해보려고 합니다.
+
+## 상태 관리는 무엇으로?
+
+- 회사 프로젝트에서 현재는 Mui를 쓰고 있고, 처음엔 개발 속도에 중점으로 맞춰 컴포넌트 내에서 인풋, 
+여러 데이터들의 상태, 백엔드에서 받은 데이터 등을 가지고 있는 흔히 말하는 짬뽕 코드가 되어버렸습니다.
+
+### 1. 상태 관리의 필요 상황
+- 컴포넌트의 상태가 많아지면서 컴포넌트의 가독성이 떨어지고, 유지보수가 어려워지는 문제가 발생했습니다.
+이때, 상태 관리 라이브러리로 redux를 사용하고 있지만, 글로벌 상태를 관리할때 사용하고 있습니다.
+그래서 slice를 만들어서 페이지 내에서 사용을 해보려고 시도를 했지만, dispatch 를 하고 상태가 업데이트를 해
+데이터를 가져오는 과정이 생각보다 오래 걸리는 느낌이라 custom hook을 사용해보기로 결정했습니다.
+
+### 2. 개선 방향에 대해서
+- 처음 개선 방향은 custom hook을 이용해 input value, handler, query를 분리하는 작업을 진행했습니다.
+
+1. useStore()
+    - 이 커스텀 훅은 현재 컴포넌트 내에서 사용할 데이터들을 저장 및 선언하는 곳입니다.
+2. useQuery()
+    - 이 커스텀 훅은 현재 컴포넌트에서 사용할 RTK Query Hook을 사용하고 데이터 패칭이 일어날때마다 useStore()에 저장된 데이터를 업데이트합니다.
+3. useHandle()
+    - 이 커스텀 훅은 현재 컴포넌트에서 사용할 핸들러 함수들을 선언하는 곳입니다.
+    - ex ) onChange, onClick, openTrigger, useEffect 등
+
+
+### 3. 예시 코드
+
+1. useStore()
+```typescript
+
+// useStore.tsx
+
+import React from 'react'
+
+
+export type Store = {
+    value: string
+    setValue: React.Dispatch<React.SetStateAction<string>>
+    data: object | null
+    setData: React.Dispatch<React.SetStateAction<object | null>>
+    isLoading: boolean
+    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+}
+
+export function useStore(): Store {
+    const [value, setValue] = React.useState<string>('')
+    const [data, setData] = React.useState<object | null>(null)
+    const [isLoading, setIsLoading] = React.useState<boolean>(false)
+    
+
+    return {
+        value,
+        setValue,
+        data,
+        setData,
+        isLoading,
+        setIsLoading
+    }
+}
+```
+
+2. useQuery()
+```typescript
+
+type Refetch = RetrunType<typeof useRTKQuery>['refetch']
+
+export type Query = {
+    refetch: Refetch
+}
+
+type Props = {
+    store: Store
+}
+
+export function useQuery([store]: Props): Query {
+    const { data, status, refetch } = useRTKQuery()
+
+    React.useEffect(() => {
+        if(data && status === 'fulfilled') {
+            store.setData(data)
+            store.setIsLoading(false)
+        }
+    }, [data, status])
+
+    return {
+        refetch
+    }
+}
+```
+
+3. useHandle()
+```typescript
+
+export type Handle = {
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+    onClick: () => void
+}
+
+type Props = {
+    store: Store
+    query: Query
+}
+
+export function useHandle([store, query]: Props): Handle {
+    const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        store.setValue(e.target.value)
+    }
+
+    const onClick = () => {
+        query.refetch()
+        store.setIsLoading(true)
+    }
+
+    return {
+        onChange,
+        onClick
+    }
+}
+```
+
+### 4. 개선 결과
+
+- 확실히 이렇게 분리를 하니 유지보수가 편리해지는 장점이 있는 것 같습니다.
+- 특히 상태 관리를 하는 코드와 비즈니스 로직을 처리하는 코드가 분리되어있어서 코드의 가독성이 높아지고, 유지보수가 편리해졌습니다.
+- 새로운 기능 또는 기존 기능을 수정하는데 있어서 여러 코드를 수정할 필요 없이 해당하는 부분만 수정해도 되는 좋은 결과를 얻을 수 있었습니다.
