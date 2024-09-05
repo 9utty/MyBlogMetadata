@@ -1,0 +1,68 @@
+{
+    "frontend": [
+        {
+            "title": "웹엡의 구성요소",
+            "path": "/frontend/1.mdx",
+            "count": 0,
+            "tag": ["web", "frontend", "app", "react"]
+
+        },
+        {
+            "title": "클라이언트 사이드 렌더링",
+            "path": "/frontend/2.mdx",
+            "count": 0,
+            "tag": ["web", "frontend", "app", "react"]
+        },
+        {
+            "title": "서버 사이드 렌더링",
+            "path": "/frontend/4.mdx",
+            "count": 0,
+            "tag": ["web", "frontend", "app", "react"]
+        },
+        {
+            "title": "정적 사이트 생성",
+            "path": "/frontend/5.mdx",
+            "count": 0,
+            "tag": ["web", "frontend"]
+        },
+        {
+            "title": "브라우저 렌더링",
+            "path": "/frontend/브라우저렌더링.mdx",
+            "count": 0,
+            "tag": ["web", "frontend"]
+        },
+        {
+            "title": "웹 전체를 아우르는 문제 정리",
+            "path": "/frontend/웹문제정리.mdx",
+            "count": 0,
+            "tag": ["web", "frontend"]
+        },
+        {
+            "title": "이력서 가이드",
+            "path": "/frontend/이력서가이드.mdx",
+            "count": 0,
+            "tag": ["web", "frontend"]
+        },
+        {
+            "title": "데이터 패칭과 캐싱 및 상태관리에 대해",
+            "path": "/frontend/RTKQuery.mdx",
+            "count": 0,
+            "tag": ["web", "frontend", "rtk", "swr", "react query"]
+        }
+    ],
+    "gameService": [
+        {
+            "title": "Pong 게임 구현(웹소켓을 이용한)",
+            "path": "/gameService/pongGame.mdx",
+            "count": 0,
+            "tag": ["game", "pong", "canvas", "web socket"]
+        },
+        {
+            "title": "웹 소켓을 어떻게 써야할까?",
+            "path": "/gameService/webSocket.mdx",
+            "count": 0,
+            "tag": ["frontend", "web socket"]
+        }
+    ]
+}
+
