@@ -1,7 +1,7 @@
 ---
 title: "요즘 고민하고 사용하는 컴포넌트 패턴"
 date: "2024-09-09"
-tags: ["컴포넌트", "패턴"]
+tags: ["컴포넌트", "패턴", "디자인 패턴"]
 ---
 
 안녕하세요. 저는 프론트엔드 개발자 이건학입니다.
@@ -14,37 +14,37 @@ tags: ["컴포넌트", "패턴"]
 
 ```javascript
 type Props = {
-	A?: {id: string, name: string, age: number}
-	B?: {id: string, name: string, age: number, job: string, ...}
+  A?: {id: string, name: string, age: number}
+  B?: {id: string, name: string, age: number, job: string, ...}
 }
 
 export function index({A, B}:Props){
-	const [obj, setObj] = React.useState(null)
-	const [viewText, setViewText] = React.useState<string>('')
-	
-	const {data: bData, status: bDataStatus} = useGetBDataQuery()
+  const [obj, setObj] = React.useState(null)
+  const [viewText, setViewText] = React.useState<string>('')
+  
+  const {data: bData, status: bDataStatus} = useGetBDataQuery()
 
-	React.useEffect(() => {
-		if(A !== undefined) {
-			getDataFetch({id: A.id, name: A.name, age: A.age})
-		} else if (B !== undefined) {
-			setViewText(`${B.name} ( ${B.id} ${B.age} )`)
-			setObj(B)
-		}
-	}, [])
-	
-	React.useEffect(() => {
-		if (bData && bDataStatus === 'fulfilled') {
-			setViewText(`${bData.name} ( ${bData.id} ${bData.age} )`)
-			setObj(bData)
-		}
-	}, [])
+  React.useEffect(() => {
+    if(A !== undefined) {
+      getDataFetch({id: A.id, name: A.name, age: A.age})
+    } else if (B !== undefined) {
+      setViewText(`${B.name} ( ${B.id} ${B.age} )`)
+      setObj(B)
+    }
+  }, [])
+  
+  React.useEffect(() => {
+    if (bData && bDataStatus === 'fulfilled') {
+      setViewText(`${bData.name} ( ${bData.id} ${bData.age} )`)
+      setObj(bData)
+    }
+  }, [])
 
-	return (
-		<button onClick={e => onClickHandle(e, obj.age)}>
-			{viewText}
-		</button>
-	)
+  return (
+    <button onClick={e => onClickHandle(e, obj.age)}>
+      {viewText}
+    </button>
+  )
 }
 ```
 
@@ -62,22 +62,22 @@ export function index({A, B}:Props){
 
 ```javascript
 type Props = {
-	B: {id: string, name: string, age: number, job: string, ...}
+  B: {id: string, name: string, age: number, job: string, ...}
 }
 
 export function index({B}:Props){
-	React.useEffect(() => {
-		if (bData && bDataStatus === 'fulfilled') {
-			setViewText(`${bData.name} ( ${bData.id} ${bData.age} )`)
-			setObj(bData)
-		}
-	}, [])
+  React.useEffect(() => {
+    if (bData && bDataStatus === 'fulfilled') {
+      setViewText(`${bData.name} ( ${bData.id} ${bData.age} )`)
+      setObj(bData)
+    }
+  }, [])
 
-	return (
-		<button onClick={e => onClickHandle(e, B.age)}>
-			{`${B.name} ( ${B.id} ${B.age} )`)}
-		</button>
-	)
+  return (
+    <button onClick={e => onClickHandle(e, B.age)}>
+      {`${B.name} ( ${B.id} ${B.age} )`)}
+    </button>
+  )
 }
 ```
 
