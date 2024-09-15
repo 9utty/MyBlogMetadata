@@ -1,0 +1,291 @@
+# 컴포넌트 설계에 대한 고민
+
+**안녕하세요. 프론트엔드 2년차 주니어 개발자 이건학입니다. 최근 회사에서 처음으로 담당하게 된 프로젝트의 초기 개발부터 배포, 운영, 유지보수까지 경험하면서 컴포넌트 설계에 대해 많은 고민을 하게 되었습니다. 여러 시도 끝에 제가 현재 적용하고 있는 방법에 대해 공유드리고자 합니다.**
+
+<br />
+<br />
+
+## 조회 페이지 컴포넌트 역할 분리 필요성
+
+<hr />
+<br />
+
+- 프로젝트 초기부터 빠르게 변화하는 게임 콘텐츠에 맞춰 개발하며 다양한 방법을 시도했습니다. 이 경험은 신속한 개발과 효율적인 유지보수를 위한 제 개발 스타일을 정립하는 데 큰 도움이 되었습니다. 주니어 개발자로서 이는 정말 귀중한 기회였습니다.
+- 1년 넘게 프로젝트를 개발하고 운영한 결과, 제 개발 스타일이 어느 정도 확립된 것 같습니다. 이는 단순히 개인적인 선호를 넘어, 프로덕트에 최적화된 컴포넌트 설계로 발전했습니다.
+1. 코드 재사용성 고려
+    - 재사용 가능한 컴포넌트를 만들어 필요한 변수나 함수를 주입함으로써, 새로 추가된 콘텐츠에 맞는 페이지에서도 동일하게 동작하도록 구현했습니다. 특히 TypeScript의 제네릭 타입을 활용한 커스텀 컴포넌트를 만들어 필수 타입, 객체, 함수 등을 주입받을 수 있게 했습니다. 또한, 커스텀 훅을 통해 필요한 변수와 함수를 미리 만들어두고 데이터를 디스패치할 함수와 변수를 주입받는 구조로 설계하여, 효율적인 컴포넌트 구성을 실현했습니다.
+2. 새로운 기능 추가, 기존 기능 수정 및 버그 추적 용이성
+    - 이 부분을 특히 중요하게 여기고 설계를 시작했습니다. 이전에는 통일성이 부족한 설계로 인해 기능 추가 및 수정 시 데이터 흐름의 일관성이 없어 추적에 많은 시간이 소요되었습니다. 또한, 데이터 패치와 뷰 컴포넌트의 분리가 어려웠고, 각 데이터 간의 의존성이 복잡하게 얽혀 있었습니다.
+    - 이러한 문제를 해결하기 위해 역할별 컴포넌트 구조를 나누고, Custom Hook 등을 이용해 함수는 기능별로 모아두었습니다. 데이터 패칭을 하는 부분은 따로 모아 역할을 명확히 분리하며 관리했습니다. 이로 인해 추후 수정이나 기능 추가 시 몇 개의 함수나 변수만 추가하거나 제거하는 방식으로 쉽게 대응할 수 있게 구성했습니다.
+
+<br />
+<br />
+
+## 폴더 구조 (예시)
+
+<hr />
+<br />
+
+```jsx
+item
+  ├── index.tsx
+  ├── hooks
+  │   ├── useItemForm.tsx
+  │   ├── useItemHandle.tsx
+  │   └── useItemQuery.tsx
+  └── components
+      ├── itemList.tsx
+      └── edit
+          ├── index.tsx
+          ├── hooks
+          │   ├── useItemEditForm.tsx
+		      │   ├── useItemEditHandle.tsx
+          │   └── ...
+          └── components
+              ├── inputItemLevel.tsx
+              └── inputItemAmount.tsx
+              └── ...
+```
+
+<br />
+<br />
+## 폴더 구조의 설명과 컴포넌트 설계 설명(예시 코드)
+
+<hr />
+<br />
+
+### **1. `index.tsx`**
+
+- **이 파일은 item 페이지의 메인 컴포넌트로, 전체 구조를 조합하고 다른 컴포넌트를 포함합니다.**
+
+### **2. `hooks`**
+
+- useItemForm.tsx
+    - **컴포넌트에서 사용하는 상태를 관리하는 Hook입니다.**
+    
+    ```jsx
+    export default function useItemForm() {
+        const [itemList, setItemList] = useState<Item[] | null>(null);
+        const [isLoading, setIsLoading] = useState<boolean>(true);
+        
+        return {
+            itemList,
+            setItemList,
+            isLoading,
+            setIsLoading
+        };
+    }
+    ```
+    
+- useItemQuery.tsx
+    - **Get, Post 등의 API 요청 로직을 처리하는 Hook입니다.**
+    
+    ```jsx
+    export type ItemQueryType = ReturnType<typeof useGetItemListQuery>
+    
+    export type ItemQuery = {
+    	refetch: ItemQueryType['refetch']
+    	status: ItemQueryType['status']
+    }
+    
+    type Props = {
+    	setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+    	setItemList: React.Dispatch<React.SetStateAction<Item[] | null>>
+    }
+    
+    export default function useItemQuery({setIsLoading, setItemList}: Props): ItemQuery {
+    	const {data: itemListData, status: itemListStats, isError: itemListDataError, refetch: itemListRefetch} = useGetItemListQuery()
+    	
+    	React.useEffect(() => {
+    		if(itemListData && itemListStatus === 'fulfilled') {
+    			setIsLoading(false)
+    			setItemList(itemListData)
+    		} else if (itemListDataError) {
+    			setIsLoading(false)
+    			setItemList(null)
+    		}
+    	}, [itemListData, itemListStats, itemListDataError])
+    	
+    	return {
+    		status: itemListStaus,
+    		refetch: itemListRefetch
+    	}
+    }
+    ```
+    
+- useItemHandle.tsx
+    - **컴포넌트 내에서 사용되는 다양한 함수들을 모아둡니다.**
+    
+    ```tsx
+    type Props = {
+    	query: ItemQuery
+    	setIsLoading: setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+    }
+    
+    export default function useItemHandle({query, setIsLoading}) {
+    	const handleRefresh = React.useCallback(() => {
+    		if(query.status !== 'uninitialized') {
+    			query.refetch()
+    			setIsLoading(true)
+    		}
+    	}, [query])
+    	
+    	/**
+    	페이지 마운트시 무조건 Data를 가져올 수 있게 하기 위한 코드
+    	*/
+    	React.useEffect(() => {
+    		handleRefresh()
+    	},[])
+    	
+    	return {
+    		handleRefresh
+    	}
+    }
+    
+    ```
+    
+    - **각 Hook은 특정한 역할을 명확히 하여 기능 추가 및 수정 시 필요한 부분만을 쉽게 수정할 수 있도록 구조화했습니다. 예를 들어, query에서 버그가 발생했다면 해당 부분만 수정하면 되므로 유지보수가 용이합니다.**
+
+### **3. `components/itemList.tsx`**
+
+- **API에서 받아온 데이터를 렌더링하는 View 컴포넌트입니다.**
+    
+    ```tsx
+    type Props = {
+    	accountId: string
+    	serviceId: string
+    	itemList: Item[]
+    }
+    
+    export default function ItemListViewComponent({accountId, serviceId, itemList}: Props) {
+    	const local = useGetLocal()
+    	
+    	const col = React.useMemo<MRT_ColumnDef<Item>[]>(() => [
+    		{
+    			id: 'itemId',
+    			accessorFn: row => `${row.itemId}`,
+    			header: local.localeString('COMMON_ITEM_ID'),
+    		},
+    		...
+    	], [])
+    
+    	return (
+    		<CustomDataGrid<Item>
+    			col={col}
+    			row={itemList}
+    		/>
+    	)
+    }
+    ```
+    
+    - **`ItemListViewComponent`는 View에 집중하고, 데이터 Fetching과 분리하여 관심사를 명확히 함으로써, 다른 컴포넌트에서도 재사용 가능하도록 설계되었습니다.**
+
+### **4. `components/edit`**
+
+- Edit 컴포넌트들도 메인 구조와 유사하게 구성했습니다. 여기서는 Edit 작업 시 ItemList의 데이터 상태에 대해 'Stale'하다는 것을 알려줘야 합니다. 이는 REST API 요청 시 데이터의 최신성을 유지하기 위해 필요합니다.
+- RTK Query의 Tag 기능 활용: 'item' 태그를 사용해 mutation 호출 시 캐시된 query 데이터를 Stale로 표시합니다. 이로 인해 Edit 작업 후 데이터가 자동으로 리패칭됩니다. 이는 Next.js의 App Route에서의 풀 라우트 캐시 관리와 유사한 기능입니다.
+- 자동 데이터 리패칭: Tag를 적절히 구성하면 Edit 작업 시 데이터가 자동으로 업데이트되어 사용자에게 최신 정보를 제공합니다.
+(참고 문서: [RTK Query 자동 리패칭](https://redux-toolkit.js.org/rtk-query/usage/automated-refetching#cache-tags))
+- useItemEditHandle.tsx
+    - 이 Hook에는 입력받은 데이터를 검증하고 query를 실행하는 함수들이 포함되어 있습니다.
+    
+    ```tsx
+    type Props = {
+    	query: ItemQuery
+    	form: ItemEditFormType
+    }
+    
+    export default function useItemEditHandle({query, form}) {
+    	const {setValue, formState, watch} = form
+    	
+    	const noti = useNotification()
+    	
+    	const validationData = React.useCallback((reason: string): PostItemEditBody | null => {
+    		if(!!formState.errors.reason) {
+    			noti('COMMON_VALIDATION_ERROR', false)
+    			
+    			return null
+    		} else if (!!formState.errors.newLevel) {
+    			noti('COMMON_VALIDATION_ERROR', false)
+    			
+    			return null
+    		} else {
+    			return {
+    				itemId: form.watch('itemId'),
+    				newLevel: form.watch('newLevel),
+    				reason: reason
+    			}
+    		}
+    	}, [])
+    	
+    	const handleApprove = React.useCallback((reason: string) => {
+    		const data = validationData(reason)
+    		
+    		if(data) {
+    			query.postUpdateItemLevelTicket(data)
+    		}
+    	},[])
+    	
+    	return {
+    		handleApprove
+    	}
+    }
+    
+    ```
+    
+    - 이 edit용 handle hook은 입력받은 데이터에 form.errors가 있는지 확인합니다. 정상적인 입력이 완료되면 query를 실행하는 함수를 포함하고 있습니다.
+
+<br />
+<br />
+
+## 장점 설명
+
+<hr />
+<br />
+
+### 1. 모듈화 및 재사용성
+
+- **구조화된 Hook 설계: 각 Hook이 특정한 역할을 갖고 있어, `useItemForm`, `useItemQuery`, `useItemHandle` 등으로 나누어져 있습니다. 이로 인해 각 기능을 독립적으로 관리할 수 있으며, 필요한 Hook만 선택적으로 재사용할 수 있습니다. 예를 들어, 새로운 컴포넌트에서 `useItemQuery`만 가져와도 API 요청 로직을 쉽게 활용할 수 있습니다.**
+
+### **2. 유지보수 용이성**
+
+- **명확한 책임 분리: 각 컴포넌트와 Hook이 명확한 책임을 가지고 있어, 특정 기능에 대한 수정이 필요할 때 해당 파일만 수정하면 됩니다. 예를 들어, 데이터 Fetching 로직에 문제가 생겼다면 `useItemQuery`만 수정하면 되어, 전체 코드에 미치는 영향을 최소화할 수 있습니다.**
+- **버그 수정의 용이성: 특정 기능에서 버그가 발생했을 경우, 해당 기능에 관련된 Hook이나 컴포넌트만 집중적으로 검토하고 수정하면 되므로 디버깅 과정이 단순해집니다.**
+
+### **3. 가독성 및 이해도 향상**
+
+- **명확한 코드 구조: 폴더 구조와 파일명이 기능에 맞춰 잘 정리되어 있어, 다른 개발자가 코드를 쉽게 이해하고 탐색할 수 있습니다. 새로운 팀원이 프로젝트에 참여할 때 빠르게 적응할 수 있는 환경을 제공합니다.**
+- **Documentation과 코드의 일관성: 각 Hook과 컴포넌트가 명확한 목적을 가지고 설계되어 있어, 코드가 자연스럽게 문서화된 형태가 됩니다. 이는 팀원 간의 소통을 원활하게 하고, 코드 리뷰 시 이해도를 높입니다.**
+
+### **4. 상태 관리의 일관성**
+
+- **전역 상태 관리와의 통합: RTK Query와 같은 라이브러리를 사용하여 상태를 관리함으로써, 데이터의 흐름을 일관되게 유지할 수 있습니다. 이로 인해 데이터 패칭 및 상태 업데이트가 명확해지며, 개발자가 데이터의 흐름을 쉽게 추적할 수 있습니다.**
+- **캐시 및 Stale 데이터 관리: RTK Query의 Tag 기능을 통해 데이터의 신선도를 관리할 수 있어, 사용자가 항상 최신 정보를 받을 수 있도록 보장합니다. 이는 사용자 경험을 크게 향상시킵니다.**
+
+### **5. 확장성 및 유연성**
+
+- **기능 추가 용이: 새로운 기능이나 컴포넌트를 추가할 때 기존 구조를 그대로 활용할 수 있습니다. 필요에 따라 새로운 Hook을 추가하거나 기존 Hook을 수정하여 기능을 확장할 수 있습니다. 예를 들어, 새로운 API 엔드포인트가 추가되면, 새로운 Hook을 만들어 손쉽게 통합할 수 있습니다.**
+- **다양한 사용 사례 지원: 각 컴포넌트가 독립적으로 설계되어 있어, 여러 상황에서 재사용이 가능합니다. 이는 코드 중복을 줄이고, 다양한 시나리오에 쉽게 적응할 수 있게 합니다.**
+
+<br />
+<br />
+
+## 단점 설명
+
+<hr />
+<br />
+
+
+### **1. 초기 설정 및 러닝 커브**
+
+- **복잡한 구조: 모듈화된 구조는 처음 프로젝트에 참여하는 개발자에게는 다소 복잡하게 느껴질 수 있습니다. 각 Hook과 컴포넌트가 분리되어 있어, 전체 흐름을 이해하는 데 시간이 걸릴 수 있습니다.**
+- **Hooks 사용법 이해 필요: Custom Hooks의 사용법과 구조를 이해해야 하므로, 초보 개발자나 팀원에게는 추가적인 학습 시간이 필요할 수 있습니다**
+
+### **2. 과도한 추상화**
+
+- **단순한 기능의 복잡성 증가: 간단한 기능을 구현할 때도 여러 Hook과 컴포넌트를 만들다 보면, 오히려 코드가 복잡해질 수 있습니다. 이로 인해 개발자가 불필요한 구조를 만들게 될 위험이 있다고 생각합니다.**
+- **추상화의 남용: 지나치게 많은 추상화는 코드의 가독성을 떨어뜨리고, 실제로 필요한 기능을 찾기 어려워 지거나, 억지로 끼워 맞춰야 하는 상황이 생길 수 있다고 생각합니다.**
+
+---
+
+이렇게 요즘 제가 고민하고 만들어가고 있는 컴포넌트 설계 방법을 소개해 드렸습니다. 긴 글을 읽어주셔서 감사합니다. 이 방법이 절대적인 정답은 아니라는 점도 잘 알고 있습니다. 앞으로도 계속해서 다양한 시도를 하고 새로운 방법을 찾아가는 개발자가 되겠습니다! 감사합니다.
