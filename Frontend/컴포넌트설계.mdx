@@ -21,12 +21,12 @@ tags: ["frontend, component, react, next"]
 
 - 1년 넘게 프로젝트를 개발하고 운영한 결과, 제 개발 스타일이 어느 정도 확립된 것 같습니다. 이는 단순히 개인적인 선호를 넘어, 프로덕트에 최적화된 컴포넌트 설계로 발전했습니다.
 
-    - 코드 재사용성 고려
-        - 재사용 가능한 컴포넌트를 만들어 필요한 변수나 함수를 주입함으로써, 새로 추가된 콘텐츠에 맞는 페이지에서도 동일하게 동작하도록 구현했습니다. 특히 TypeScript의 제네릭 타입을 활용한 커스텀 컴포넌트를 만들어 필수 타입, 객체, 함수 등을 주입받을 수 있게 했습니다. 또한, 커스텀 훅을 통해 필요한 변수와 함수를 미리 만들어두고 데이터를 디스패치할 함수와 변수를 주입받는 구조로 설계하여, 효율적인 컴포넌트 구성을 실현했습니다.
-    
-    - 새로운 기능 추가, 기존 기능 수정 및 버그 추적 용이성
-        - 이 부분을 특히 중요하게 여기고 설계를 시작했습니다. 이전에는 통일성이 부족한 설계로 인해 기능 추가 및 수정 시 데이터 흐름의 일관성이 없어 추적에 많은 시간이 소요되었습니다. 또한, 데이터 패치와 뷰 컴포넌트의 분리가 어려웠고, 각 데이터 간의 의존성이 복잡하게 얽혀 있었습니다.
-        - 이러한 문제를 해결하기 위해 역할별 컴포넌트 구조를 나누고, Custom Hook 등을 이용해 함수는 기능별로 모아두었습니다. 데이터 패칭을 하는 부분은 따로 모아 역할을 명확히 분리하며 관리했습니다. 이로 인해 추후 수정이나 기능 추가 시 몇 개의 함수나 변수만 추가하거나 제거하는 방식으로 쉽게 대응할 수 있게 구성했습니다.
+		- 코드 재사용성 고려
+				- 재사용 가능한 컴포넌트를 만들어 필요한 변수나 함수를 주입함으로써, 새로 추가된 콘텐츠에 맞는 페이지에서도 동일하게 동작하도록 구현했습니다. 특히 TypeScript의 제네릭 타입을 활용한 커스텀 컴포넌트를 만들어 필수 타입, 객체, 함수 등을 주입받을 수 있게 했습니다. 또한, 커스텀 훅을 통해 필요한 변수와 함수를 미리 만들어두고 데이터를 디스패치할 함수와 변수를 주입받는 구조로 설계하여, 효율적인 컴포넌트 구성을 실현했습니다.
+		
+		- 새로운 기능 추가, 기존 기능 수정 및 버그 추적 용이성
+				- 이 부분을 특히 중요하게 여기고 설계를 시작했습니다. 이전에는 통일성이 부족한 설계로 인해 기능 추가 및 수정 시 데이터 흐름의 일관성이 없어 추적에 많은 시간이 소요되었습니다. 또한, 데이터 패치와 뷰 컴포넌트의 분리가 어려웠고, 각 데이터 간의 의존성이 복잡하게 얽혀 있었습니다.
+				- 이러한 문제를 해결하기 위해 역할별 컴포넌트 구조를 나누고, Custom Hook 등을 이용해 함수는 기능별로 모아두었습니다. 데이터 패칭을 하는 부분은 따로 모아 역할을 명확히 분리하며 관리했습니다. 이로 인해 추후 수정이나 기능 추가 시 몇 개의 함수나 변수만 추가하거나 제거하는 방식으로 쉽게 대응할 수 있게 구성했습니다.
 
 <br />
 <br />
@@ -38,23 +38,23 @@ tags: ["frontend, component, react, next"]
 
 ```javascript
 item
-  ├── index.tsx
-  ├── hooks
-  │   ├── useItemForm.tsx
-  │   ├── useItemHandle.tsx
-  │   └── useItemQuery.tsx
-  └── components
-      ├── itemList.tsx
-      └── edit
-          ├── index.tsx
-          ├── hooks
-          │   ├── useItemEditForm.tsx
-          │   ├── useItemEditHandle.tsx
-          │   └── ...
-          └── components
-              ├── inputItemLevel.tsx
-              └── inputItemAmount.tsx
-              └── ...
+	├── index.tsx
+	├── hooks
+	│   ├── useItemForm.tsx
+	│   ├── useItemHandle.tsx
+	│   └── useItemQuery.tsx
+	└── components
+			├── itemList.tsx
+			└── edit
+					├── index.tsx
+					├── hooks
+					│   ├── useItemEditForm.tsx
+					│   ├── useItemEditHandle.tsx
+					│   └── ...
+					└── components
+							├── inputItemLevel.tsx
+							└── inputItemAmount.tsx
+							└── ...
 ```
 
 <br />
@@ -71,124 +71,124 @@ item
 ### 2. hooks
 
 - useItemForm.tsx
-    - **컴포넌트에서 사용하는 상태를 관리하는 Hook입니다.**
-    
-    ```javascript
-    export default function useItemForm() {
-        const [itemList, setItemList] = useState<Item[] | null>(null);
-        const [isLoading, setIsLoading] = useState<boolean>(true);
-        
-        return {
-            itemList,
-            setItemList,
-            isLoading,
-            setIsLoading
-        };
-    }
-    ```
-    
+		- **컴포넌트에서 사용하는 상태를 관리하는 Hook입니다.**
+		
+		```javascript
+		export default function useItemForm() {
+			const [itemList, setItemList] = useState<Item[] | null>(null);
+			const [isLoading, setIsLoading] = useState<boolean>(true);
+			
+			return {
+				itemList,
+				setItemList,
+				isLoading,
+				setIsLoading
+			};
+		}
+		```
+		
 - useItemQuery.tsx
-    - Get, Post 등의 API 요청 로직을 처리하는 Hook입니다.
-    
-    ```javascript
-    export type ItemQueryType = ReturnType<typeof useGetItemListQuery>
-    
-    export type ItemQuery = {
-    	refetch: ItemQueryType['refetch']
-    	status: ItemQueryType['status']
-    }
-    
-    type Props = {
-    	setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
-    	setItemList: React.Dispatch<React.SetStateAction<Item[] | null>>
-    }
-    
-    export default function useItemQuery({setIsLoading, setItemList}: Props): ItemQuery {
-    	const {data: itemListData, status: itemListStats, isError: itemListDataError, refetch: itemListRefetch} = useGetItemListQuery()
-    	
-    	React.useEffect(() => {
-    		if(itemListData && itemListStatus === 'fulfilled') {
-    			setIsLoading(false)
-    			setItemList(itemListData)
-    		} else if (itemListDataError) {
-    			setIsLoading(false)
-    			setItemList(null)
-    		}
-    	}, [itemListData, itemListStats, itemListDataError])
-    	
-    	return {
-    		status: itemListStaus,
-    		refetch: itemListRefetch
-    	}
-    }
-    ```
-    
+		- Get, Post 등의 API 요청 로직을 처리하는 Hook입니다.
+		
+		```javascript
+		export type ItemQueryType = ReturnType<typeof useGetItemListQuery>
+		
+		export type ItemQuery = {
+			refetch: ItemQueryType['refetch']
+			status: ItemQueryType['status']
+		}
+		
+		type Props = {
+			setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+			setItemList: React.Dispatch<React.SetStateAction<Item[] | null>>
+		}
+		
+		export default function useItemQuery({setIsLoading, setItemList}: Props): ItemQuery {
+			const {data: itemListData, status: itemListStats, isError: itemListDataError, refetch: itemListRefetch} = useGetItemListQuery()
+			
+			React.useEffect(() => {
+				if(itemListData && itemListStatus === 'fulfilled') {
+					setIsLoading(false)
+					setItemList(itemListData)
+				} else if (itemListDataError) {
+					setIsLoading(false)
+					setItemList(null)
+				}
+			}, [itemListData, itemListStats, itemListDataError])
+			
+			return {
+				status: itemListStaus,
+				refetch: itemListRefetch
+			}
+		}
+		```
+		
 - useItemHandle.tsx
-    - 컴포넌트 내에서 사용되는 다양한 함수들을 모아둡니다.
-    
-    ```javascript
-    type Props = {
-    	query: ItemQuery
-    	setIsLoading: setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
-    }
-    
-    export default function useItemHandle({query, setIsLoading}) {
-    	const handleRefresh = React.useCallback(() => {
-    		if(query.status !== 'uninitialized') {
-    			query.refetch()
-    			setIsLoading(true)
-    		}
-    	}, [query])
-    	
-    	/**
-    	페이지 마운트시 무조건 Data를 가져올 수 있게 하기 위한 코드
-    	*/
-    	React.useEffect(() => {
-    		handleRefresh()
-    	},[])
-    	
-    	return {
-    		handleRefresh
-    	}
-    }
-    
-    ```
-    
-    - **각 Hook은 특정한 역할을 명확히 하여 기능 추가 및 수정 시 필요한 부분만을 쉽게 수정할 수 있도록 구조화했습니다. 예를 들어, query에서 버그가 발생했다면 해당 부분만 수정하면 되므로 유지보수가 용이합니다.**
+		- 컴포넌트 내에서 사용되는 다양한 함수들을 모아둡니다.
+		
+		```javascript
+		type Props = {
+			query: ItemQuery
+			setIsLoading: setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+		}
+		
+		export default function useItemHandle({query, setIsLoading}) {
+			const handleRefresh = React.useCallback(() => {
+				if(query.status !== 'uninitialized') {
+					query.refetch()
+					setIsLoading(true)
+				}
+			}, [query])
+			
+			/**
+			페이지 마운트시 무조건 Data를 가져올 수 있게 하기 위한 코드
+			*/
+			React.useEffect(() => {
+				handleRefresh()
+			},[])
+			
+			return {
+				handleRefresh
+			}
+		}
+		
+		```
+		
+		- **각 Hook은 특정한 역할을 명확히 하여 기능 추가 및 수정 시 필요한 부분만을 쉽게 수정할 수 있도록 구조화했습니다. 예를 들어, query에서 버그가 발생했다면 해당 부분만 수정하면 되므로 유지보수가 용이합니다.**
 
 ### 3. components/itemList.tsx
 
 - API에서 받아온 데이터를 렌더링하는 View 컴포넌트입니다.
-    
-    ```javascript
-    type Props = {
-    	accountId: string
-    	serviceId: string
-    	itemList: Item[]
-    }
-    
-    export default function ItemListViewComponent({accountId, serviceId, itemList}: Props) {
-    	const local = useGetLocal()
-    	
-    	const col = React.useMemo<MRT_ColumnDef<Item>[]>(() => [
-    		{
-    			id: 'itemId',
-    			accessorFn: row => `${row.itemId}`,
-    			header: local.localeString('COMMON_ITEM_ID'),
-    		},
-    		...
-    	], [])
-    
-    	return (
-    		<CustomDataGrid<Item>
-    			col={col}
-    			row={itemList}
-    		/>
-    	)
-    }
-    ```
-    
-    - ItemListViewComponent는 View에 집중하고, 데이터 Fetching과 분리하여 관심사를 명확히 함으로써, 다른 컴포넌트에서도 재사용 가능하도록 설계되었습니다.
+		
+		```javascript
+		type Props = {
+			accountId: string
+			serviceId: string
+			itemList: Item[]
+		}
+		
+		export default function ItemListViewComponent({accountId, serviceId, itemList}: Props) {
+			const local = useGetLocal()
+			
+			const col = React.useMemo<MRT_ColumnDef<Item>[]>(() => [
+				{
+					id: 'itemId',
+					accessorFn: row => `${row.itemId}`,
+					header: local.localeString('COMMON_ITEM_ID'),
+				},
+				...
+			], [])
+		
+			return (
+				<CustomDataGrid<Item>
+					col={col}
+					row={itemList}
+				/>
+			)
+		}
+		```
+		
+		- ItemListViewComponent는 View에 집중하고, 데이터 Fetching과 분리하여 관심사를 명확히 함으로써, 다른 컴포넌트에서도 재사용 가능하도록 설계되었습니다.
 
 ### 4. components/edit
 
@@ -197,53 +197,53 @@ item
 - 자동 데이터 리패칭: Tag를 적절히 구성하면 Edit 작업 시 데이터가 자동으로 업데이트되어 사용자에게 최신 정보를 제공합니다.
 (참고 문서: [RTK Query 자동 리패칭](https://redux-toolkit.js.org/rtk-query/usage/automated-refetching#cache-tags))
 - useItemEditHandle.tsx
-    - 이 Hook에는 입력받은 데이터를 검증하고 query를 실행하는 함수들이 포함되어 있습니다.
-    
-    ```javascript
-    type Props = {
-    	query: ItemQuery
-    	form: ItemEditFormType
-    }
-    
-    export default function useItemEditHandle({query, form}) {
-    	const {setValue, formState, watch} = form
-    	
-    	const noti = useNotification()
-    	
-    	const validationData = React.useCallback((reason: string): PostItemEditBody | null => {
-    		if(!!formState.errors.reason) {
-    			noti('COMMON_VALIDATION_ERROR', false)
-    			
-    			return null
-    		} else if (!!formState.errors.newLevel) {
-    			noti('COMMON_VALIDATION_ERROR', false)
-    			
-    			return null
-    		} else {
-    			return {
-    				itemId: form.watch('itemId'),
-    				newLevel: form.watch('newLevel),
-    				reason: reason
-    			}
-    		}
-    	}, [])
-    	
-    	const handleApprove = React.useCallback((reason: string) => {
-    		const data = validationData(reason)
-    		
-    		if(data) {
-    			query.postUpdateItemLevelTicket(data)
-    		}
-    	},[])
-    	
-    	return {
-    		handleApprove
-    	}
-    }
-    
-    ```
-    
-    - 이 edit용 handle hook은 입력받은 데이터에 form.errors가 있는지 확인합니다. 정상적인 입력이 완료되면 query를 실행하는 함수를 포함하고 있습니다.
+		- 이 Hook에는 입력받은 데이터를 검증하고 query를 실행하는 함수들이 포함되어 있습니다.
+		
+		```javascript
+		type Props = {
+			query: ItemQuery
+			form: ItemEditFormType
+		}
+		
+		export default function useItemEditHandle({query, form}) {
+			const {setValue, formState, watch} = form
+			
+			const noti = useNotification()
+			
+			const validationData = React.useCallback((reason: string): PostItemEditBody | null => {
+				if(!!formState.errors.reason) {
+					noti('COMMON_VALIDATION_ERROR', false)
+					
+					return null
+				} else if (!!formState.errors.newLevel) {
+					noti('COMMON_VALIDATION_ERROR', false)
+					
+					return null
+				} else {
+					return {
+						itemId: form.watch('itemId'),
+						newLevel: form.watch('newLevel),
+						reason: reason
+					}
+				}
+			}, [])
+			
+			const handleApprove = React.useCallback((reason: string) => {
+				const data = validationData(reason)
+				
+				if(data) {
+					query.postUpdateItemLevelTicket(data)
+				}
+			},[])
+			
+			return {
+				handleApprove
+			}
+		}
+		
+		```
+		
+		- 이 edit용 handle hook은 입력받은 데이터에 form.errors가 있는지 확인합니다. 정상적인 입력이 완료되면 query를 실행하는 함수를 포함하고 있습니다.
 
 <br />
 <br />
